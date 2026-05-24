@@ -1,0 +1,613 @@
+ *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: #000;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #000; }
+  ::-webkit-scrollbar-thumb { background: #39ff14; border-radius: 2px; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 72px;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 26px; font-weight: 700; color: #fff;
+    text-decoration: none; letter-spacing: -1px;
+    display: flex; align-items: baseline; gap: 2px;
+  }
+  .nav-logo sup {
+    font-size: 11px; font-weight: 400;
+    font-family: 'Share Tech Mono', monospace;
+    color: #39ff14; vertical-align: super;
+  }
+  .nav-links { display: flex; gap: 48px; align-items: center; }
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 24px; color: #fff; text-decoration: none;
+    letter-spacing: 0.5px; transition: color .2s;
+  }
+  .nav-links a:hover { color: #39ff14; }
+  .nav-socials { display: flex; gap: 10px; }
+  .social-btn {
+    width: 36px; height: 36px; border: 1.5px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; cursor: pointer; transition: border-color .2s, color .2s;
+    text-decoration: none;
+  }
+  .social-btn:hover { border-color: #39ff14; color: #39ff14; }
+  .social-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    background: #000;
+    display: flex; align-items: center;
+    padding: 72px 0 0;
+    position: relative; overflow: hidden;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 0 72px;
+    max-width: 520px;
+  }
+  .hero-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(44px, 5.5vw, 72px);
+    font-weight: 900; line-height: 1.05;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .hero-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 44px;
+    max-width: 360px;
+  }
+  .btn-green {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 24px; letter-spacing: 1px;
+    color: #000; background: #39ff14;
+    padding: 16px 40px; border: none;
+    cursor: pointer; text-decoration: none;
+    transition: background .2s, transform .2s;
+  }
+  .btn-green:hover { background: #5aff3a; transform: translateY(-2px); }
+
+  /* NFT cards strip */
+  .hero-cards {
+    position: absolute; right: -40px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; gap: 24px; align-items: center;
+    z-index: 1;
+  }
+  .nft-card {
+    position: relative; border: 1.5px solid rgba(255,255,255,0.5);
+    overflow: hidden; flex-shrink: 0;
+  }
+  .nft-card.main {
+    width: 320px; height: 420px;
+    border-color: rgba(255,255,255,0.85);
+    box-shadow: 0 0 40px rgba(180,50,120,0.4);
+  }
+  .nft-card.side {
+    width: 240px; height: 340px;
+    opacity: 0.6;
+    border-color: rgba(255,255,255,0.35);
+  }
+  .nft-card-bg {
+    width: 100%; height: 100%;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 28px;
+  }
+
+  /* Abstract shapes inside cards */
+  .nft-shape {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .nft-shape svg { width: 100%; height: 90%; opacity: 0.85; }
+  .wave-label {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    font-family: 'Orbitron', monospace;
+    font-size: 18px; font-weight: 700;
+    color: #fff; letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+    z-index: 2;
+  }
+  .nft-card.main .wave-label { font-size: 22px; }
+
+  /* ── WAVE NFT SECTION ── */
+  #wave-nft {
+    padding: 100px 72px;
+    background: #000;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+  .nft-left h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800; line-height: 1.15;
+    text-transform: uppercase; margin-bottom: 40px;
+  }
+  .nft-left h2 span { color: rgba(255,255,255,0.45); display: block; }
+  .nft-card-big {
+    width: 280px; height: 360px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    position: relative; overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,150,255,0.25);
+  }
+
+  .terminal-box {
+    border: 1.5px solid rgba(100,120,200,0.5);
+    border-left: 3px solid #39ff14;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    background: rgba(255,255,255,0.02);
+  }
+  .terminal-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 15px; line-height: 1.75;
+    color: #39ff14;
+  }
+  .nft-right p {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; line-height: 1.75;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 20px;
+  }
+  .btn-outline {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px; letter-spacing: 1px;
+    color: #fff; background: transparent;
+    padding: 16px 40px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    cursor: pointer; text-decoration: none;
+    transition: border-color .2s, color .2s;
+    margin-top: 12px;
+  }
+  .btn-outline:hover { border-color: #39ff14; color: #39ff14; }
+
+  /* ── MARQUEE ── */
+  .marquee-section {
+    padding: 40px 0; overflow: hidden;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .marquee-track {
+    display: flex; gap: 80px; white-space: nowrap;
+    animation: marquee 18s linear infinite;
+  }
+  .marquee-track.pink { animation-direction: reverse; }
+  .marquee-word {
+    font-family: 'Orbitron', monospace;
+    font-size: 48px; font-weight: 900;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255,255,255,0.25);
+    flex-shrink: 0;
+  }
+  .marquee-word.accent { -webkit-text-stroke-color: rgba(255,20,180,0.5); }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ── ARTISTS ── */
+  #artists { padding: 80px 72px; background: #000; }
+  .artists-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px 24px;
+    margin-top: 0;
+  }
+  .artist-card { text-align: center; }
+  .artist-photo {
+    width: 100%; aspect-ratio: 1/1;
+    background: #1a1a1a;
+    filter: grayscale(100%);
+    object-fit: cover;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .artist-photo-placeholder {
+    width: 100%; aspect-ratio: 1/1;
+
+    margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; color: #333;
+  }
+  .artist-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px; letter-spacing: 1px;
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* ── STORY ── */
+  #story { padding: 80px 0; background: #000; }
+  .story-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 700; text-align: center;
+    letter-spacing: 4px; margin-bottom: 48px;
+  }
+  .story-title .dot { color: #39ff14; }
+  .story-layout {
+    display: grid; grid-template-columns: 220px 1fr;
+    max-width: 900px; margin: 0 auto;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    margin-bottom: 50px;
+  }
+  .story-nav { border-right: 1px solid rgba(255,255,255,0.08); }
+  .story-nav-item {
+    padding: 22px 28px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: color .2s;
+  }
+  .story-nav-item.active {
+    color: #39ff14;
+    background: rgba(57,255,20,0.04);
+    border-left: 2px solid #39ff14;
+  }
+  .story-nav-item:hover { color: #fff; }
+  .story-content { padding: 32px 40px; display: flex; gap: 32px; }
+  .story-image {
+    width: 160px; height: 200px; flex-shrink: 0;
+   
+    filter: grayscale(100%);
+    display: flex; align-items: center; justify-content: center;
+    color: #333; font-size: 40px;
+  }
+  
+
+  .story-quote {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 15px; line-height: 1.8;
+    color: #39ff14;
+    border-left: 3px solid #39ff14;
+    padding-left: 20px;
+    margin-bottom: 24px;
+  }
+  .story-text p {
+    font-size: 15px; line-height: 1.75;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 16px;
+  }
+  .story-photo-section {
+    height: 320px;
+   
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+    overflow: hidden; position: relative;
+  }
+  .story-photo-overlay {
+    position: absolute; inset: 0;
+   width: 100%; height: 100%;
+    display: flex; justify-content: center;
+    gap: 80px;
+  }
+
+  /* ── ROADMAP ── */
+  #roadmap {
+    padding: 100px 72px;
+    background: #000;
+    position: relative; overflow: hidden;
+  }
+  /* Concentric circles background */
+  .circles-bg {
+    position: absolute; pointer-events: none;
+  }
+  .circles-bg.left { left: -180px; }
+  .circles-bg.right { right: -180px; top: 40%; }
+  .circle-ring {
+    border: 1px solid rgba(57,255,20,0.15);
+    border-radius: 50%;
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+  }
+  .roadmap-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 32px; font-weight: 900;
+    text-align: center; letter-spacing: 6px;
+    margin-bottom: 64px;
+  }
+  .roadmap-list { max-width: 640px; margin: 0 auto; position: relative; z-index: 1; }
+  .roadmap-connector {
+    width: 1px; height: 48px;
+    background: #39ff14;
+    margin: 0 auto;
+  }
+  .roadmap-phase {
+    border: 1px solid rgba(57,255,20,0.35);
+    background: rgba(255,255,255,0.03);
+    padding: 0;
+    margin-bottom: 0;
+  }
+  .phase-header {
+    padding: 16px 24px 12px;
+    border-bottom: 1px solid rgba(57,255,20,0.2);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .phase-num {
+    width: 32px; height: 32px;
+    background: #39ff14;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 16px; font-weight: 900;
+    color: #000; flex-shrink: 0;
+  }
+  .phase-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: #39ff14;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .phase-title-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .phase-body {
+    padding: 20px 24px;
+    display: flex; gap: 20px;
+  }
+  .phase-details { flex: 1; }
+  .phase-details ul {
+    list-style: none; margin-bottom: 16px;
+  }
+  .phase-details ul li {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px; color: rgba(255,255,255,0.75);
+    padding: 3px 0; padding-left: 14px; position: relative;
+  }
+  .phase-details ul li::before {
+    content: '—'; position: absolute; left: 0;
+    color: rgba(57,255,20,0.5);
+  }
+  .phase-details p {
+    font-size: 13px; line-height: 1.6;
+    color: rgba(255,255,255,0.5);
+  }
+  .phase-nft {
+    width: 80px; height: 100px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.2);
+    position: relative; overflow: hidden;
+  }
+
+  /* ── PARTNERS ── */
+  #partners { padding: 80px 72px; background: #000; }
+  .partners-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 24px; letter-spacing: 3px;
+    color: #39ff14; text-align: center;
+    margin-bottom: 40px;
+  }
+  .partners-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0 0;
+    max-width: 960px; margin: auto -80px;
+  }
+  .partner-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(24px, 3vw, 40px);
+    font-weight: 900; letter-spacing: 2px;
+    color: #fff; padding: 28px 40px;
+  }
+
+  /* ── FAQ ── */
+  #faq {
+    padding: 80px 72px;
+    background: #000;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: start;
+  }
+  .faq-left h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 900; line-height: 1.2;
+    text-transform: uppercase;
+  }
+  .faq-left h2 .dim { color: rgba(255,255,255,0.35); }
+  .faq-nft {
+    width: 300px; height: 350px; margin-top: 48px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    position: relative; overflow: hidden;
+  }
+  .faq-list { display: flex; flex-direction: column; gap: 0; }
+  .faq-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 2px;
+  }
+  .faq-question {
+    padding: 18px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px; letter-spacing: 0.5px;
+    color: #fff;
+  }
+  .faq-indicator {
+    width: 14px; height: 14px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    flex-shrink: 0; margin-left: 16px;
+  }
+  .faq-answer {
+    padding: 0 20px 18px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px; line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+    display: none;
+  }
+  .faq-item.open .faq-answer { display: block; }
+  .faq-item.open .faq-indicator { background: rgba(255,255,255,0.4); }
+
+  /* ── TEAM MARQUEE ── */
+  #team { padding-top: 0; background: #000; }
+  .team-marquee-wrap {
+    overflow: hidden;
+    border-top: 2px solid #ff14e0;
+    border-bottom: 2px solid #ff14e0;
+    padding: 12px 0;
+    background: #000;
+    margin-bottom: 64px;
+  }
+  .team-marquee-track {
+    display: flex; gap: 60px; white-space: nowrap;
+    animation: marquee 14s linear infinite;
+  }
+  .team-marquee-word {
+    font-family: 'Orbitron', monospace;
+    font-size: 44px; font-weight: 900;
+    letter-spacing: 6px; text-transform: uppercase;
+    color: #fff; flex-shrink: 0;
+  }
+  .team-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0 40px;
+    max-width: 1000px; margin: 0 auto;
+  }
+  .team-card { text-align: center; }
+  .team-photo {
+    width: 100%; aspect-ratio: 3/4;
+  
+    filter: grayscale(100%) contrast(1.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px; color: #333;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .team-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .team-role {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: #39ff14;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .team-socials { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+  .team-social {
+    width: 36px; height: 36px; border: 1.5px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; text-decoration: none; transition: all .2s;
+  }
+  .team-social:hover { border-color: #39ff14; color: #39ff14; }
+  .team-social svg { width: 14px; height: 14px; fill: currentColor; }
+  .team-bio {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px; line-height: 1.65;
+    color: rgba(255,255,255,0.5); text-align: center;
+  }
+
+  /* ── DISCORD CTA ── */
+  #discord-cta {
+    padding: 100px 72px;
+    background: #000;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+  .discord-left h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 900; line-height: 1.05;
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .discord-left h2 span { color: #39ff14; display: block; }
+  .discord-left p {
+    font-size: 16px; line-height: 1.7;
+    color: rgba(255,255,255,0.65); margin-bottom: 36px;
+    max-width: 320px;
+  }
+  .btn-discord {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px; letter-spacing: 1px;
+    color: #000; background: #39ff14;
+    padding: 16px 32px; border: none;
+    cursor: pointer; text-decoration: none;
+    transition: background .2s;
+  }
+  .btn-discord:hover { background: #5aff3a; }
+  .discord-nft {
+    width: 100%; max-width: 380px; aspect-ratio: 3/4;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    position: relative; overflow: hidden;
+    justify-self: center;
+  }
+  .discord-nft-bg {
+    width: 100%; height: 100%;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(120,0,200,0.7) 0%, transparent 55%),
+      radial-gradient(ellipse at 30% 80%, rgba(180,0,80,0.5) 0%, transparent 50%),
+      linear-gradient(135deg, #060212 0%, #12051e 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #4a0e8f;
+    padding: 52px 72px;
+    display: grid; grid-template-columns: 200px 1fr 1fr 1fr 1fr;
+    gap: 40px; align-items: start;
+  }
+  .footer-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px; font-weight: 700; color: #fff;
+    text-decoration: none; display: block;
+    margin-bottom: 24px;
+  }
+  .footer-logo sup {
+    font-size: 10px; font-family: 'Share Tech Mono', monospace;
+    color: #39ff14;
+  }
+  .footer-copy {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px; color: rgba(255,255,255,0.45);
+    letter-spacing: 0.5px; margin-top: 8px;
+  }
+
+  .footer-link {
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px; color: rgba(255,255,255,0.8);
+    text-decoration: none; margin-bottom: 18px;
+    transition: color .2s;
+  }
+  .footer-link:hover { color: #39ff14; }
+  .footer-info {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px; color: rgba(255,255,255,0.55);
+    line-height: 2;
+  }
+  .footer-socials { display: flex; gap: 10px; justify-content: flex-end; align-items: flex-start; }
+
+  /* ── UTILS ── */
+  .section-spacer { height: 1px; background: rgba(255,255,255,0.05); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeIn .8s ease both; }

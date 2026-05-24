@@ -1,1216 +1,688 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Meta RL — Meta Record Label</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Rajdhani', sans-serif;
-    background: #000;
-    color: #fff;
-    overflow-x: hidden;
-  }
-
-  /* ── SCROLLBAR ── */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: #000; }
-  ::-webkit-scrollbar-thumb { background: #39ff14; border-radius: 2px; }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 48px; height: 72px;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(12px);
-  }
-  .nav-logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 26px; font-weight: 700; color: #fff;
-    text-decoration: none; letter-spacing: -1px;
-    display: flex; align-items: baseline; gap: 2px;
-  }
-  .nav-logo sup {
-    font-size: 11px; font-weight: 400;
-    font-family: 'Share Tech Mono', monospace;
-    color: #39ff14; vertical-align: super;
-  }
-  .nav-links { display: flex; gap: 48px; align-items: center; }
-  .nav-links a {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px; color: #fff; text-decoration: none;
-    letter-spacing: 0.5px; transition: color .2s;
-  }
-  .nav-links a:hover { color: #39ff14; }
-  .nav-socials { display: flex; gap: 10px; }
-  .social-btn {
-    width: 36px; height: 36px; border: 1.5px solid #fff;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; cursor: pointer; transition: border-color .2s, color .2s;
-    text-decoration: none;
-  }
-  .social-btn:hover { border-color: #39ff14; color: #39ff14; }
-  .social-btn svg { width: 16px; height: 16px; fill: currentColor; }
-
-  /* ── HERO ── */
-  #hero {
-    min-height: 100vh;
-    background: #000;
-    display: flex; align-items: center;
-    padding: 72px 0 0;
-    position: relative; overflow: hidden;
-  }
-  .hero-content {
-    position: relative; z-index: 2;
-    padding: 0 72px;
-    max-width: 520px;
-  }
-  .hero-title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(44px, 5.5vw, 72px);
-    font-weight: 900; line-height: 1.05;
-    letter-spacing: -1px;
-    text-transform: uppercase;
-    margin-bottom: 28px;
-  }
-  .hero-desc {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px; line-height: 1.7;
-    color: rgba(255,255,255,0.75);
-    margin-bottom: 44px;
-    max-width: 360px;
-  }
-  .btn-green {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px; letter-spacing: 1px;
-    color: #000; background: #39ff14;
-    padding: 16px 40px; border: none;
-    cursor: pointer; text-decoration: none;
-    transition: background .2s, transform .2s;
-  }
-  .btn-green:hover { background: #5aff3a; transform: translateY(-2px); }
-
-  /* NFT cards strip */
-  .hero-cards {
-    position: absolute; right: -40px; top: 50%;
-    transform: translateY(-50%);
-    display: flex; gap: 24px; align-items: center;
-    z-index: 1;
-  }
-  .nft-card {
-    position: relative; border: 1.5px solid rgba(255,255,255,0.5);
-    overflow: hidden; flex-shrink: 0;
-  }
-  .nft-card.main {
-    width: 320px; height: 420px;
-    border-color: rgba(255,255,255,0.85);
-    box-shadow: 0 0 40px rgba(180,50,120,0.4);
-  }
-  .nft-card.side {
-    width: 240px; height: 340px;
-    opacity: 0.6;
-    border-color: rgba(255,255,255,0.35);
-  }
-  .nft-card-bg {
-    width: 100%; height: 100%;
-    display: flex; align-items: flex-end; justify-content: center;
-    padding-bottom: 28px;
-  }
-  /* Simulated abstract art backgrounds */
-  .nft-bg-1 {
-    background:
-      radial-gradient(ellipse at 40% 30%, rgba(0,120,180,0.6) 0%, transparent 60%),
-      radial-gradient(ellipse at 70% 70%, rgba(80,0,140,0.5) 0%, transparent 55%),
-      linear-gradient(135deg, #050a14 0%, #0a0520 100%);
-  }
-  .nft-bg-2 {
-    background:
-      radial-gradient(ellipse at 50% 40%, rgba(180,30,100,0.7) 0%, transparent 55%),
-      radial-gradient(ellipse at 30% 70%, rgba(120,0,60,0.5) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, rgba(60,0,120,0.4) 0%, transparent 45%),
-      linear-gradient(135deg, #100510 0%, #1a0520 100%);
-  }
-  .nft-bg-3 {
-    background:
-      radial-gradient(ellipse at 60% 40%, rgba(100,0,180,0.6) 0%, transparent 55%),
-      radial-gradient(ellipse at 40% 70%, rgba(180,50,80,0.4) 0%, transparent 50%),
-      linear-gradient(135deg, #0a0514 0%, #14051a 100%);
-  }
-  /* Abstract shapes inside cards */
-  .nft-shape {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .nft-shape svg { width: 90%; height: 90%; opacity: 0.85; }
-  .wave-label {
-    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
-    font-family: 'Orbitron', monospace;
-    font-size: 18px; font-weight: 700;
-    color: #fff; letter-spacing: 3px;
-    text-shadow: 0 0 20px rgba(255,255,255,0.5);
-    z-index: 2;
-  }
-  .nft-card.main .wave-label { font-size: 22px; }
-
-  /* ── WAVE NFT SECTION ── */
-  #wave-nft {
-    padding: 100px 72px;
-    background: #000;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 80px; align-items: center;
-  }
-  .nft-left h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(28px, 4vw, 48px);
-    font-weight: 800; line-height: 1.15;
-    text-transform: uppercase; margin-bottom: 40px;
-  }
-  .nft-left h2 span { color: rgba(255,255,255,0.45); display: block; }
-  .nft-card-big {
-    width: 280px; height: 360px;
-    border: 1.5px solid rgba(255,255,255,0.6);
-    position: relative; overflow: hidden;
-    box-shadow: 0 0 50px rgba(0,150,255,0.25);
-  }
-
-  .terminal-box {
-    border: 1.5px solid rgba(100,120,200,0.5);
-    border-left: 3px solid #39ff14;
-    padding: 24px 28px;
-    margin-bottom: 28px;
-    background: rgba(255,255,255,0.02);
-  }
-  .terminal-text {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 15px; line-height: 1.75;
-    color: #39ff14;
-  }
-  .nft-right p {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px; line-height: 1.75;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 20px;
-  }
-  .btn-outline {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px; letter-spacing: 1px;
-    color: #fff; background: transparent;
-    padding: 16px 40px;
-    border: 1.5px solid rgba(255,255,255,0.4);
-    cursor: pointer; text-decoration: none;
-    transition: border-color .2s, color .2s;
-    margin-top: 12px;
-  }
-  .btn-outline:hover { border-color: #39ff14; color: #39ff14; }
-
-  /* ── MARQUEE ── */
-  .marquee-section {
-    padding: 40px 0; overflow: hidden;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .marquee-track {
-    display: flex; gap: 80px; white-space: nowrap;
-    animation: marquee 18s linear infinite;
-  }
-  .marquee-track.pink { animation-direction: reverse; }
-  .marquee-word {
-    font-family: 'Orbitron', monospace;
-    font-size: 48px; font-weight: 900;
-    letter-spacing: 4px; text-transform: uppercase;
-    color: transparent;
-    -webkit-text-stroke: 1.5px rgba(255,255,255,0.25);
-    flex-shrink: 0;
-  }
-  .marquee-word.accent { -webkit-text-stroke-color: rgba(255,20,180,0.5); }
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
-  }
-
-  /* ── ARTISTS ── */
-  #artists { padding: 80px 72px; background: #000; }
-  .artists-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 28px 24px;
-    margin-top: 0;
-  }
-  .artist-card { text-align: center; }
-  .artist-photo {
-    width: 100%; aspect-ratio: 1/1;
-    background: #1a1a1a;
-    filter: grayscale(100%);
-    object-fit: cover;
-    margin-bottom: 12px;
-    overflow: hidden;
-  }
-  .artist-photo-placeholder {
-    width: 100%; aspect-ratio: 1/1;
-    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-    margin-bottom: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 48px; color: #333;
-  }
-  .artist-name {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px; letter-spacing: 1px;
-    color: rgba(255,255,255,0.8);
-  }
-
-  /* ── STORY ── */
-  #story { padding: 80px 0; background: #000; }
-  .story-title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(22px, 3vw, 36px);
-    font-weight: 700; text-align: center;
-    letter-spacing: 4px; margin-bottom: 48px;
-  }
-  .story-title .dot { color: #39ff14; }
-  .story-layout {
-    display: grid; grid-template-columns: 220px 1fr;
-    max-width: 900px; margin: 0 auto;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
-  }
-  .story-nav { border-right: 1px solid rgba(255,255,255,0.08); }
-  .story-nav-item {
-    padding: 22px 28px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px; letter-spacing: 1px;
-    color: rgba(255,255,255,0.5);
-    cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06);
-    transition: color .2s;
-  }
-  .story-nav-item.active {
-    color: #39ff14;
-    background: rgba(57,255,20,0.04);
-    border-left: 2px solid #39ff14;
-  }
-  .story-nav-item:hover { color: #fff; }
-  .story-content { padding: 32px 40px; display: flex; gap: 32px; }
-  .story-image {
-    width: 160px; height: 200px; flex-shrink: 0;
-    background: linear-gradient(135deg, #111, #1a1a1a);
-    filter: grayscale(100%);
-    display: flex; align-items: center; justify-content: center;
-    color: #333; font-size: 40px;
-  }
-  
-
-  .story-quote {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 15px; line-height: 1.8;
-    color: #39ff14;
-    border-left: 3px solid #39ff14;
-    padding-left: 20px;
-    margin-bottom: 24px;
-  }
-  .story-text p {
-    font-size: 15px; line-height: 1.75;
-    color: rgba(255,255,255,0.65);
-    margin-bottom: 16px;
-  }
-  .story-photo-section {
-    height: 320px;
-    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%),
-      linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-    display: flex; align-items: center; justify-content: center;
-    margin-top: 2px;
-    overflow: hidden; position: relative;
-  }
-  .story-photo-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(10,10,10,0.6));
-    display: flex; align-items: center; justify-content: center;
-    gap: 80px;
-  }
-  .music-icon { font-size: 80px; opacity: 0.15; filter: grayscale(100%); }
-
-  /* ── ROADMAP ── */
-  #roadmap {
-    padding: 100px 72px;
-    background: #000;
-    position: relative; overflow: hidden;
-  }
-  /* Concentric circles background */
-  .circles-bg {
-    position: absolute; pointer-events: none;
-  }
-  .circles-bg.left { left: -180px; }
-  .circles-bg.right { right: -180px; top: 40%; }
-  .circle-ring {
-    border: 1px solid rgba(57,255,20,0.15);
-    border-radius: 50%;
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-  }
-  .roadmap-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 32px; font-weight: 900;
-    text-align: center; letter-spacing: 6px;
-    margin-bottom: 64px;
-  }
-  .roadmap-list { max-width: 640px; margin: 0 auto; position: relative; z-index: 1; }
-  .roadmap-connector {
-    width: 1px; height: 48px;
-    background: #39ff14;
-    margin: 0 auto;
-  }
-  .roadmap-phase {
-    border: 1px solid rgba(57,255,20,0.35);
-    background: rgba(255,255,255,0.03);
-    padding: 0;
-    margin-bottom: 0;
-  }
-  .phase-header {
-    padding: 16px 24px 12px;
-    border-bottom: 1px solid rgba(57,255,20,0.2);
-    display: flex; align-items: center; gap: 16px;
-  }
-  .phase-num {
-    width: 32px; height: 32px;
-    background: #39ff14;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Orbitron', monospace;
-    font-size: 16px; font-weight: 900;
-    color: #000; flex-shrink: 0;
-  }
-  .phase-meta {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px; color: #39ff14;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .phase-title-text {
-    font-family: 'Orbitron', monospace;
-    font-size: 14px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase;
-  }
-  .phase-body {
-    padding: 20px 24px;
-    display: flex; gap: 20px;
-  }
-  .phase-details { flex: 1; }
-  .phase-details ul {
-    list-style: none; margin-bottom: 16px;
-  }
-  .phase-details ul li {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px; color: rgba(255,255,255,0.75);
-    padding: 3px 0; padding-left: 14px; position: relative;
-  }
-  .phase-details ul li::before {
-    content: '—'; position: absolute; left: 0;
-    color: rgba(57,255,20,0.5);
-  }
-  .phase-details p {
-    font-size: 13px; line-height: 1.6;
-    color: rgba(255,255,255,0.5);
-  }
-  .phase-nft {
-    width: 80px; height: 100px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.2);
-    position: relative; overflow: hidden;
-  }
-
-  /* ── PARTNERS ── */
-  #partners { padding: 80px 72px; background: #000; }
-  .partners-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px; letter-spacing: 3px;
-    color: #39ff14; text-align: center;
-    margin-bottom: 40px;
-  }
-  .partners-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 0 0;
-    max-width: 960px; margin: 0 auto;
-  }
-  .partner-logo {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(24px, 3vw, 40px);
-    font-weight: 900; letter-spacing: 2px;
-    color: #fff; padding: 28px 40px;
-  }
-
-  /* ── FAQ ── */
-  #faq {
-    padding: 80px 72px;
-    background: #000;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 80px; align-items: start;
-  }
-  .faq-left h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(28px, 3.5vw, 44px);
-    font-weight: 900; line-height: 1.2;
-    text-transform: uppercase;
-  }
-  .faq-left h2 .dim { color: rgba(255,255,255,0.35); }
-  .faq-nft {
-    width: 200px; height: 270px; margin-top: 48px;
-    border: 1.5px solid rgba(255,255,255,0.5);
-    position: relative; overflow: hidden;
-  }
-  .faq-list { display: flex; flex-direction: column; gap: 0; }
-  .faq-item {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 2px;
-  }
-  .faq-question {
-    padding: 18px 20px;
-    display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px; letter-spacing: 0.5px;
-    color: #fff;
-  }
-  .faq-indicator {
-    width: 14px; height: 14px;
-    border: 1.5px solid rgba(255,255,255,0.4);
-    flex-shrink: 0; margin-left: 16px;
-  }
-  .faq-answer {
-    padding: 0 20px 18px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px; line-height: 1.7;
-    color: rgba(255,255,255,0.55);
-    display: none;
-  }
-  .faq-item.open .faq-answer { display: block; }
-  .faq-item.open .faq-indicator { background: rgba(255,255,255,0.4); }
-
-  /* ── TEAM MARQUEE ── */
-  #team { padding-top: 0; background: #000; }
-  .team-marquee-wrap {
-    overflow: hidden;
-    border-top: 2px solid #ff14e0;
-    border-bottom: 2px solid #ff14e0;
-    padding: 12px 0;
-    background: #000;
-    margin-bottom: 64px;
-  }
-  .team-marquee-track {
-    display: flex; gap: 60px; white-space: nowrap;
-    animation: marquee 14s linear infinite;
-  }
-  .team-marquee-word {
-    font-family: 'Orbitron', monospace;
-    font-size: 44px; font-weight: 900;
-    letter-spacing: 6px; text-transform: uppercase;
-    color: #fff; flex-shrink: 0;
-  }
-  .team-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 0 40px; padding: 0 72px;
-    max-width: 1000px; margin: 0 auto;
-  }
-  .team-card { text-align: center; }
-  .team-photo {
-    width: 100%; aspect-ratio: 3/4;
-    background: linear-gradient(135deg, #111, #222);
-    filter: grayscale(100%) contrast(1.1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 64px; color: #333;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .team-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 15px; font-weight: 700;
-    letter-spacing: 2px; margin-bottom: 6px;
-  }
-  .team-role {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px; color: #39ff14;
-    letter-spacing: 2px; text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-  .team-socials { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
-  .team-social {
-    width: 36px; height: 36px; border: 1.5px solid #fff;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; text-decoration: none; transition: all .2s;
-  }
-  .team-social:hover { border-color: #39ff14; color: #39ff14; }
-  .team-social svg { width: 14px; height: 14px; fill: currentColor; }
-  .team-bio {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px; line-height: 1.65;
-    color: rgba(255,255,255,0.5); text-align: center;
-  }
-
-  /* ── DISCORD CTA ── */
-  #discord-cta {
-    padding: 100px 72px;
-    background: #000;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 80px; align-items: center;
-  }
-  .discord-left h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(32px, 5vw, 64px);
-    font-weight: 900; line-height: 1.05;
-    text-transform: uppercase; margin-bottom: 24px;
-  }
-  .discord-left h2 span { color: #39ff14; display: block; }
-  .discord-left p {
-    font-size: 16px; line-height: 1.7;
-    color: rgba(255,255,255,0.65); margin-bottom: 36px;
-    max-width: 320px;
-  }
-  .btn-discord {
-    display: inline-flex; align-items: center; gap: 12px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px; letter-spacing: 1px;
-    color: #000; background: #39ff14;
-    padding: 16px 32px; border: none;
-    cursor: pointer; text-decoration: none;
-    transition: background .2s;
-  }
-  .btn-discord:hover { background: #5aff3a; }
-  .discord-nft {
-    width: 100%; max-width: 380px; aspect-ratio: 3/4;
-    border: 1.5px solid rgba(255,255,255,0.6);
-    position: relative; overflow: hidden;
-    justify-self: center;
-  }
-  .discord-nft-bg {
-    width: 100%; height: 100%;
-    background:
-      radial-gradient(ellipse at 50% 30%, rgba(120,0,200,0.7) 0%, transparent 55%),
-      radial-gradient(ellipse at 30% 80%, rgba(180,0,80,0.5) 0%, transparent 50%),
-      linear-gradient(135deg, #060212 0%, #12051e 100%);
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    background: #4a0e8f;
-    padding: 52px 72px;
-    display: grid; grid-template-columns: 200px 1fr 1fr 1fr 1fr;
-    gap: 40px; align-items: start;
-  }
-  .footer-logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 22px; font-weight: 700; color: #fff;
-    text-decoration: none; display: block;
-    margin-bottom: 24px;
-  }
-  .footer-logo sup {
-    font-size: 10px; font-family: 'Share Tech Mono', monospace;
-    color: #39ff14;
-  }
-  .footer-copy {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px; color: rgba(255,255,255,0.45);
-    letter-spacing: 0.5px; margin-top: 8px;
-  }
-
-  .footer-link {
-    display: block;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px; color: rgba(255,255,255,0.8);
-    text-decoration: none; margin-bottom: 18px;
-    transition: color .2s;
-  }
-  .footer-link:hover { color: #39ff14; }
-  .footer-info {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px; color: rgba(255,255,255,0.55);
-    line-height: 2;
-  }
-  .footer-socials { display: flex; gap: 10px; justify-content: flex-end; align-items: flex-start; }
-
-  /* ── UTILS ── */
-  .section-spacer { height: 1px; background: rgba(255,255,255,0.05); }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-in { animation: fadeIn .8s ease both; }
-</style>
-</head>
-<body>
-
-<!-- ══════════════════ NAV ══════════════════ -->
-<nav>
-  <a href="#" class="nav-logo">Meta<sup>RL</sup></a>
-  <div class="nav-links">
-    <a href="#wave-nft">Wave NFTs</a>
-    <a href="#story">Stories</a>
-    <a href="#faq">Contact</a>
-  </div>
-  <div class="nav-socials">
-    <!-- Twitter -->
-    <a href="#" class="social-btn">
-      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
-    </a>
-    <!-- Discord -->
-    <a href="#" class="social-btn">
-      <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
-    </a>
-    <!-- YouTube -->
-    <a href="#" class="social-btn">
-      <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-    </a>
-    <!-- Telegram -->
-    <a href="#" class="social-btn">
-      <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-    </a>
-  </div>
-</nav>
-
-<!-- ══════════════════ HERO ══════════════════ -->
-<section id="hero">
-  <div class="hero-content animate-in">
-    <h1 class="hero-title">META RECORD<br/>LABEL</h1>
-    <p class="hero-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
-    <a href="#wave-nft" class="btn-green">Learn More</a>
-  </div>
-
-  <!-- NFT Cards -->
-  <div class="hero-cards">
-    <!-- Left card (smaller, dimmer) -->
-    <div class="nft-card side">
-      <div class="nft-card-bg nft-bg-1">
-        <div class="nft-shape">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="100" cy="160" rx="60" ry="12" fill="rgba(0,200,255,0.3)"/>
-            <path d="M60 40 L100 20 L140 40 L160 100 L140 160 L100 180 L60 160 L40 100 Z" fill="none" stroke="rgba(0,200,255,0.4)" stroke-width="1"/>
-            <path d="M80 60 L120 60 L140 120 L100 150 L60 120 Z" fill="rgba(0,120,200,0.25)"/>
-            <line x1="60" y1="40" x2="140" y2="160" stroke="rgba(0,200,255,0.2)" stroke-width="0.5"/>
-            <line x1="140" y1="40" x2="60" y2="160" stroke="rgba(0,200,255,0.2)" stroke-width="0.5"/>
-            <circle cx="100" cy="100" r="35" fill="rgba(0,80,160,0.3)" stroke="rgba(0,200,255,0.3)" stroke-width="0.5"/>
-          </svg>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meta RL — Meta Record Label</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <!-- ══════════════════ NAV ══════════════════ -->
+      <nav>
+        <a href="#" class="nav-logo">Meta<sup>RL</sup></a>
+        <div class="nav-links">
+          <a href="#wave-nft">Wave NFTs</a>
+          <a href="#story">Stories</a>
+          <a href="#faq">Contact</a>
         </div>
-      </div>
-      <span class="wave-label">WAVE</span>
-    </div>
-
-    <!-- Center card (main, bright) -->
-    <div class="nft-card main">
-      <div class="nft-card-bg nft-bg-2">
-        <div class="nft-shape">
-          <svg viewBox="0 0 200 260" fill="none">
-            <ellipse cx="100" cy="220" rx="70" ry="14" fill="rgba(220,50,100,0.4)"/>
-            <path d="M50 30 L100 10 L150 30 L170 120 L150 210 L100 240 L50 210 L30 120 Z" fill="none" stroke="rgba(220,50,150,0.5)" stroke-width="1.5"/>
-            <path d="M70 60 L130 60 L150 140 L100 180 L50 140 Z" fill="rgba(180,20,80,0.3)"/>
-            <polygon points="100,40 140,110 100,140 60,110" fill="rgba(200,0,100,0.2)" stroke="rgba(255,100,150,0.4)" stroke-width="1"/>
-            <circle cx="100" cy="110" r="40" fill="rgba(150,0,80,0.3)" stroke="rgba(220,50,120,0.4)" stroke-width="1"/>
-            <circle cx="100" cy="110" r="20" fill="rgba(200,0,60,0.35)"/>
-            <!-- Orbit ring -->
-            <ellipse cx="100" cy="200" rx="80" ry="20" fill="none" stroke="rgba(220,50,100,0.5)" stroke-width="2"/>
-          </svg>
-        </div>
-      </div>
-      <span class="wave-label" style="font-size:24px;">WAVE</span>
-    </div>
-
-    <!-- Right card (smaller, dimmer) -->
-    <div class="nft-card side">
-      <div class="nft-card-bg nft-bg-3">
-        <div class="nft-shape">
-          <svg viewBox="0 0 200 200" fill="none">
-            <ellipse cx="100" cy="168" rx="55" ry="11" fill="rgba(100,50,200,0.3)"/>
-            <path d="M55 35 L100 15 L145 35 L165 100 L145 165 L100 185 L55 165 L35 100 Z" fill="none" stroke="rgba(120,50,200,0.4)" stroke-width="1"/>
-            <path d="M75 55 L125 55 L145 120 L100 152 L55 120 Z" fill="rgba(80,20,160,0.25)"/>
-            <circle cx="100" cy="100" r="32" fill="rgba(60,0,140,0.3)" stroke="rgba(120,50,200,0.35)" stroke-width="1"/>
-            <ellipse cx="100" cy="165" rx="65" ry="15" fill="none" stroke="rgba(150,80,220,0.4)" stroke-width="1.5"/>
-          </svg>
-        </div>
-      </div>
-      <span class="wave-label">WAVE</span>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════ WAVE NFT ══════════════════ -->
-<section id="wave-nft">
-  <div class="nft-left">
-    <h2>WAVE NFT<br/><span>COLLECTION OF</span><span>777</span></h2>
-    <div class="nft-card-big">
-      <div style="width:100%;height:100%;background:radial-gradient(ellipse at 40% 40%, rgba(0,120,200,0.6) 0%, transparent 55%), radial-gradient(ellipse at 70% 70%, rgba(60,0,160,0.5) 0%, transparent 50%), linear-gradient(135deg,#050a18,#0a0520);">
-        <div style="width:100%;height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:24px;">
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 200 260" fill="none" style="width:85%;height:85%;">
-              <ellipse cx="100" cy="220" rx="65" ry="13" fill="rgba(0,180,255,0.35)"/>
-              <path d="M55 30 L100 10 L145 30 L165 120 L145 210 L100 240 L55 210 L35 120 Z" fill="none" stroke="rgba(0,180,255,0.4)" stroke-width="1.5"/>
-              <polygon points="100,40 145,120 100,160 55,120" fill="rgba(0,80,180,0.25)" stroke="rgba(0,200,255,0.35)" stroke-width="1"/>
-              <circle cx="100" cy="110" r="42" fill="rgba(0,60,160,0.3)" stroke="rgba(0,180,255,0.4)" stroke-width="1"/>
-              <ellipse cx="100" cy="200" rx="75" ry="18" fill="none" stroke="rgba(0,200,255,0.45)" stroke-width="2"/>
+        <div class="nav-socials">
+          <!-- Twitter -->
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"
+              />
             </svg>
-          </div>
-          <span style="position:relative;z-index:2;font-family:'Orbitron',monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.5);">WAVE</span>
+          </a>
+          <!-- Discord -->
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"
+              />
+            </svg>
+          </a>
+          <!-- YouTube -->
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+              />
+            </svg>
+          </a>
+          <!-- Telegram -->
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"
+              />
+            </svg>
+          </a>
         </div>
-      </div>
-    </div>
-  </div>
+      </nav>
+    </header>
 
-  <div class="nft-right">
-    <div class="terminal-box">
-      <p class="terminal-text">META WAVE NFT is your pass to Meta Record Label ecosystem. It is your access to our industry experts, established artists, and partners.</p>
-    </div>
-    <p>Hac habitasse platea dictumst vestibulum rhoncus est. Sit amet dictum sit amet justo. Tortor aliquam nulla facilisi cras.</p>
-    <p>Maecenas ultricies mi eget mauris pharetra. Sit amet consectetur adipiscing elit ut aliquam purus. Porta nibh venenatis cras sed felis. Aenean vel elit scelerisque mauris pellentesque pulvinar. Et malesuada fames ac turpis egestas sed tempus. Enim sit amet venenatis urna cursus eget.</p>
-    <p>Maecenas ultricies mi eget mauris pharetra et ultrices. A condimentum vitae sapien pellentesque habitant morbi.</p>
-    <a href="#" class="btn-outline">Get One On OpenSea</a>
-  </div>
-</section>
-
-<!-- ══════════════════ ARTISTS MARQUEE ══════════════════ -->
-<div class="marquee-section">
-  <div class="marquee-track">
-    <span class="marquee-word">ARTISTS</span>
-    <span class="marquee-word">ARTISTS</span>
-    <span class="marquee-word">ARTISTS</span>
-    <span class="marquee-word">ARTISTS</span>
-    <span class="marquee-word">ARTISTS</span>
-    <span class="marquee-word">ARTISTS</span>
-    <span class="marquee-word">ARTISTS</span>
-
-  </div>
-</div>
-
-<!-- ══════════════════ ARTISTS GRID ══════════════════ -->
-
-<section id="artists">
-  <div class="artists-grid">
-    <!-- Row 1 -->
-    <div class="artist-card">
-      <div class="artist-photo-placeholder">
-        <img src="/IMAGE.png" alt="Mark Popson">
-      </div>
-      <div class="artist-name">Mark Popson</div>
-    </div>
-
-    <div class="artist-card">
-      <div class="artist-photo-placeholder">
-        <img src="/IMAGE (1).png" alt="Pete Bentz">
-      </div>
-      <div class="artist-name">Pete Bentz</div>
-    </div>
-
-    <div class="artist-card">
-      <div class="artist-photo-placeholder">
-        <img src="/IMAGE (2).png" alt="Daniela Youth">
-      </div>
-      <div class="artist-name">Daniela Youth</div>
-    </div>
-
-    <div class="artist-card">
-      <div class="artist-photo-placeholder">
-        <img src="/IMAGE (3).png" alt="Roman Gore">
-      </div>
-      <div class="artist-name">Roman Gore</div>
-    </div>
-
-    <!-- Row 2 -->
-    <div class="artist-card">
-      <div class="artist-photo-placeholder">
-        <img src="/IMAGE (4).png" alt="Tonya">
-      </div>
-      <div class="artist-name">Tonya</div>
-    </div>
-
-    <div class="artist-card">
-      <div class="artist-photo-placeholder">
-        <img src="/IMAGE (5).png" alt="Ivor">
-      </div>
-      <div class="artist-name">Ivor</div>
-    </div>
-
-    <div class="artist-card">
-      <div class="artist-photo-placeholder">
-        <img src="/IMAGE (6).png" alt="Somae Petit">
-      </div>
-      <div class="artist-name">Somae Petit</div>
-    </div>
-
-
-</section>
-<!-- ══════════════════ STORY ══════════════════ -->
-<div class="section-spacer"></div>
-<section id="story">
-  <h2 class="story-title">MRL<span class="dot">.</span>THE STORY<span class="dot">.</span></h2>
-  <div style="max-width:900px;margin:0 auto 0;">
-    <div class="story-layout">
-      <div class="story-nav">
-        <div class="story-nav-item active" onclick="switchTab(this,'founders')">Our founders</div>
-        <div class="story-nav-item" onclick="switchTab(this,'partners')">Partners</div>
-        <div class="story-nav-item" onclick="switchTab(this,'future')">The future</div>
-      </div>
-      <div class="story-content" id="story-content">
-        <div class="story-image">
-          <!-- B&W silhouette of two people -->
-<img src="/IMAGE (8).png">
+    <main>
+      <!-- ══════════════════ HERO ══════════════════ -->
+      <section id="hero">
+        <div class="hero-content animate-in">
+          <h1 class="hero-title">META RECORD<br />LABEL</h1>
+          <p class="hero-desc">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+            varius enim in eros elementum tristique.
+          </p>
+          <a href="#wave-nft" class="btn-green">Learn More</a>
         </div>
-        <div class="story-text">
-          <div class="story-quote">META record label was founded by Shaky Lake and Baky Hike in 2020 business accelerator.</div>
-          <p>Hac habitasse platea dictumst vestibulum rhoncus est. Sit amet dictum sit amet justo. Tortor aliquam nulla facilisi cras.</p>
-          <p>Maecenas ultricies mi eget mauris pharetra. Sit amet consectetur adipiscing elit ut aliquam purus. Porta nibh venenatis cras sed felis. Aenean vel elit scelerisque mauris pellentesque pulvinar. Et malesuada fames ac turpis egestas sed tempus. Enim sit amet venenatis urna cursus eget.</p>
-          <p>Maecenas ultricies mi eget mauris pharetra et ultrices. A condimentum vitae sapien pellentesque habitant morbi.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Full-width photo strip -->
-  <div class="story-photo-section" style="margin-top:2px;width:100%">
-    <div class="story-photo-overlay">
-      <span class="music-icon">🎸</span>
-<img src="/IMAGE (10).png">
-      <span class="music-icon">🎵</span>
-    </div>
-  </div>
-</section>
 
-<!-- ══════════════════ ROADMAP ══════════════════ -->
-<section id="roadmap">
-  <!-- Background circles LEFT -->
-  <div class="circles-bg left" style="top:50%;transform:translateY(-50%);width:400px;height:400px;">
-    <div class="circle-ring" style="width:360px;height:360px;"></div>
-    <div class="circle-ring" style="width:260px;height:260px;"></div>
-    <div class="circle-ring" style="width:160px;height:160px;"></div>
-    <div class="circle-ring" style="width:80px;height:80px;"></div>
-  </div>
-  <!-- Background circles RIGHT -->
-  <div class="circles-bg right" style="width:360px;height:360px;">
-    <div class="circle-ring" style="width:320px;height:320px;"></div>
-    <div class="circle-ring" style="width:220px;height:220px;"></div>
-    <div class="circle-ring" style="width:120px;height:120px;"></div>
-  </div>
-
-  <h2 class="roadmap-title">ROADMAP</h2>
-
-  <div class="roadmap-list">
-    <!-- Phase 1 -->
-    <div class="roadmap-phase">
-      <div class="phase-header">
-        <div class="phase-num">1</div>
-        <div>
-          <div class="phase-meta">PHASE 1 — COMPLETED</div>
-          <div class="phase-title-text">SPRING 2022 — PRE LAUNCH</div>
+        <!-- NFT Cards -->
+        <div class="hero-cards">
+          <img style="margin-right: 100px" src="/IMAGE (15).png" />
         </div>
-      </div>
-      <div class="phase-body">
-        <div class="phase-details">
-          <ul>
-            <li>Website 1.2</li>
-            <li>Discord community promotion</li>
-            <li>MINTING WAVE NFTs</li>
-          </ul>
-          <p>WAVE NFTs will be 100% pre-minted and launched as an OpenOcean collection</p>
-        </div>
-        <div class="phase-nft">
-          <div style="width:100%;height:100%;background:radial-gradient(ellipse at 50% 40%, rgba(180,30,100,0.6) 0%, transparent 55%),linear-gradient(135deg,#100510,#1a0520);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;">
-            <span style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:#fff;">WAVE</span>
+      </section>
+      <!-- ══════════════════ WAVE NFT ══════════════════ -->
+      <section id="wave-nft">
+        <div class="nft-left">
+          <h2>WAVE NFT<br /><span>COLLECTION OF</span><span>777</span></h2>
+          <div class="nft-card-big">
+            <img
+              style="width: 100%; height: 100%; object-fit: cover"
+              src="/IMAGE (16).png"
+            />
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="roadmap-connector"></div>
+        <div class="nft-right">
+          <div class="terminal-box">
+            <p class="terminal-text">
+              META WAVE NFT is your pass to Meta Record Label ecosystem. It is
+              your access to our industry experts, established artists, and
+              partners.
+            </p>
+          </div>
+          <p>
+            Hac habitasse platea dictumst vestibulum rhoncus est. Sit amet
+            dictum sit amet justo. Tortor aliquam nulla facilisi cras.
+          </p>
+          <p>
+            Maecenas ultricies mi eget mauris pharetra. Sit amet consectetur
+            adipiscing elit ut aliquam purus. Porta nibh venenatis cras sed
+            felis. Aenean vel elit scelerisque mauris pellentesque pulvinar. Et
+            malesuada fames ac turpis egestas sed tempus. Enim sit amet
+            venenatis urna cursus eget.
+          </p>
+          <p>
+            Maecenas ultricies mi eget mauris pharetra et ultrices. A
+            condimentum vitae sapien pellentesque habitant morbi.
+          </p>
+          <a href="#" class="btn-outline">Get One On OpenSea</a>
+        </div>
+      </section>
 
-    <!-- Phase 2 -->
-    <div class="roadmap-phase">
-      <div class="phase-header">
-        <div class="phase-num">2</div>
-        <div>
-          <div class="phase-meta">PHASE 2</div>
-          <div class="phase-title-text">SUMMER 2022 — GROWTH</div>
+      <!-- ══════════════════ ARTISTS MARQUEE ══════════════════ -->
+      <div class="marquee-section">
+        <div class="marquee-track">
+          <span class="marquee-word">ARTISTS</span>
+          <span class="marquee-word">ARTISTS</span>
+          <span class="marquee-word">ARTISTS</span>
+          <span class="marquee-word">ARTISTS</span>
+          <span class="marquee-word">ARTISTS</span>
+          <span class="marquee-word">ARTISTS</span>
+          <span class="marquee-word">ARTISTS</span>
         </div>
       </div>
-      <div class="phase-body">
-        <div class="phase-details">
-          <ul>
-            <li>Hiring for 10 positions in</li>
-            <li>Partnerships with main Metaverse players</li>
-            <li>Partnerships with WEB 2.0 music distribution</li>
-          </ul>
-          <p>Onboarding 100 new artists</p>
-          <p>META Record Labels is holding the first screening of aspiring artists from the list of WAVE NFT holders</p>
-        </div>
-        <div class="phase-nft">
-          <div style="width:100%;height:100%;background:radial-gradient(ellipse at 50% 40%, rgba(0,100,200,0.6) 0%, transparent 55%),linear-gradient(135deg,#050a18,#0a0520);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;">
-            <span style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:#fff;">WAVE</span>
+
+      <!-- ══════════════════ ARTISTS GRID ══════════════════ -->
+
+      <section id="artists">
+        <div class="artists-grid">
+          <!-- Row 1 -->
+          <div class="artist-card">
+            <div class="artist-photo-placeholder">
+              <img src="/IMAGE.png" alt="Mark Popson" />
+            </div>
+            <div class="artist-name">Mark Popson</div>
+          </div>
+
+          <div class="artist-card">
+            <div class="artist-photo-placeholder">
+              <img src="/IMAGE (1).png" alt="Pete Bentz" />
+            </div>
+            <div class="artist-name">Pete Bentz</div>
+          </div>
+
+          <div class="artist-card">
+            <div class="artist-photo-placeholder">
+              <img src="/IMAGE (2).png" alt="Daniela Youth" />
+            </div>
+            <div class="artist-name">Daniela Youth</div>
+          </div>
+
+          <div class="artist-card">
+            <div class="artist-photo-placeholder">
+              <img src="/IMAGE (3).png" alt="Roman Gore" />
+            </div>
+            <div class="artist-name">Roman Gore</div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="artist-card">
+            <div class="artist-photo-placeholder">
+              <img src="/IMAGE (4).png" alt="Tonya" />
+            </div>
+            <div class="artist-name">Tonya</div>
+          </div>
+
+          <div class="artist-card">
+            <div class="artist-photo-placeholder">
+              <img src="/IMAGE (5).png" alt="Ivor" />
+            </div>
+            <div class="artist-name">Ivor</div>
+          </div>
+
+          <div class="artist-card">
+            <div class="artist-photo-placeholder">
+              <img src="/IMAGE (6).png" alt="Somae Petit" />
+            </div>
+            <div class="artist-name">Somae Petit</div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="roadmap-connector"></div>
-
-    <!-- Phase 3 -->
-    <div class="roadmap-phase">
-      <div class="phase-header">
-        <div class="phase-num">3</div>
-        <div>
-          <div class="phase-meta">PHASE 3</div>
-          <div class="phase-title-text">SUMMER 2022 — YOUR NEW STAGE</div>
-        </div>
-      </div>
-      <div class="phase-body">
-        <div class="phase-details">
-          <ul>
-            <li>Onboarding new partners</li>
-            <li>First live concert in Sandjar</li>
-            <li>Live concert in Decentrafield</li>
-          </ul>
-          <p>We secured dates for our artists to perform in front of the live audience of Metaverse. Check the concert schedule in our <a href="#" style="color:#39ff14;text-decoration:none;">Discord</a>.</p>
-        </div>
-        <div class="phase-nft">
-          <div style="width:100%;height:100%;background:radial-gradient(ellipse at 50% 40%, rgba(120,0,200,0.6) 0%, transparent 55%),radial-gradient(ellipse at 30% 70%, rgba(180,50,80,0.4) 0%, transparent 50%),linear-gradient(135deg,#0a0514,#14051a);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;">
-            <span style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:#fff;">WAVE</span>
+      </section>
+      <!-- ══════════════════ STORY ══════════════════ -->
+      <div class="section-spacer"></div>
+      <section id="story">
+        <h2 class="story-title">
+          MRL<span class="dot">.</span>THE STORY<span class="dot">.</span>
+        </h2>
+        <div style="max-width: 900px; margin: 0 auto 0">
+          <div class="story-layout">
+            <div class="story-nav">
+              <div
+                class="story-nav-item active"
+                onclick="switchTab(this, 'founders')"
+              >
+                Our founders
+              </div>
+              <div class="story-nav-item" onclick="switchTab(this, 'partners')">
+                Partners
+              </div>
+              <div class="story-nav-item" onclick="switchTab(this, 'future')">
+                The future
+              </div>
+            </div>
+            <div class="story-content" id="story-content">
+              <div class="story-image">
+                <!-- B&W silhouette of two people -->
+                <img style="margin-top: 62px" src="/IMAGE (8).png" />
+              </div>
+              <div class="story-text">
+                <div class="story-quote">
+                  META record label was founded by Shaky Lake and Baky Hike in
+                  2020 business accelerator.
+                </div>
+                <p>
+                  Hac habitasse platea dictumst vestibulum rhoncus est. Sit amet
+                  dictum sit amet justo. Tortor aliquam nulla facilisi cras.
+                </p>
+                <p>
+                  Maecenas ultricies mi eget mauris pharetra. Sit amet
+                  consectetur adipiscing elit ut aliquam purus. Porta nibh
+                  venenatis cras sed felis. Aenean vel elit scelerisque mauris
+                  pellentesque pulvinar. Et malesuada fames ac turpis egestas
+                  sed tempus. Enim sit amet venenatis urna cursus eget.
+                </p>
+                <p>
+                  Maecenas ultricies mi eget mauris pharetra et ultrices. A
+                  condimentum vitae sapien pellentesque habitant morbi.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
+        <!-- Full-width photo strip -->
+        <div class="story-photo-section" style="margin-top: 2px; width: 100%">
+          <div class="story-photo-overlay">
+            <img src="/IMAGE (10).png" />
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ ROADMAP ══════════════════ -->
+      <section id="roadmap">
+        <!-- Background circles LEFT -->
+        <div
+          class="circles-bg left"
+          style="
+            top: 50%;
+            transform: translateY(-50%);
+            width: 400px;
+            height: 400px;
+          "
+        >
+          <div class="circle-ring" style="width: 360px; height: 360px"></div>
+          <div class="circle-ring" style="width: 260px; height: 260px"></div>
+          <div class="circle-ring" style="width: 160px; height: 160px"></div>
+          <div class="circle-ring" style="width: 80px; height: 80px"></div>
+        </div>
+        <!-- Background circles RIGHT -->
+        <div class="circles-bg right" style="width: 360px; height: 360px">
+          <div class="circle-ring" style="width: 320px; height: 320px"></div>
+          <div class="circle-ring" style="width: 220px; height: 220px"></div>
+          <div class="circle-ring" style="width: 120px; height: 120px"></div>
+        </div>
+
+        <h2 class="roadmap-title">ROADMAP</h2>
+
+        <div class="roadmap-list">
+          <!-- Phase 1 -->
+          <div class="roadmap-phase">
+            <div class="phase-header">
+              <div class="phase-num">1</div>
+              <div>
+                <div class="phase-meta">PHASE 1 — COMPLETED</div>
+                <div class="phase-title-text">SPRING 2022 — PRE LAUNCH</div>
+              </div>
+            </div>
+            <div class="phase-body">
+              <div class="phase-details">
+                <ul>
+                  <li>Website 1.2</li>
+                  <li>Discord community promotion</li>
+                  <li>MINTING WAVE NFTs</li>
+                </ul>
+                <p>
+                  WAVE NFTs will be 100% pre-minted and launched as an OpenOcean
+                  collection
+                </p>
+              </div>
+              <div class="phase-nft">
+                <img
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 8px;
+                  "
+                  src="/IMAGE (18).png"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="roadmap-connector"></div>
+
+          <!-- Phase 2 -->
+          <div class="roadmap-phase">
+            <div class="phase-header">
+              <div class="phase-num">2</div>
+              <div>
+                <div class="phase-meta">PHASE 2</div>
+                <div class="phase-title-text">SUMMER 2022 — GROWTH</div>
+              </div>
+            </div>
+            <div class="phase-body">
+              <div class="phase-details">
+                <ul>
+                  <li>Hiring for 10 positions in</li>
+                  <li>Partnerships with main Metaverse players</li>
+                  <li>Partnerships with WEB 2.0 music distribution</li>
+                </ul>
+                <p>Onboarding 100 new artists</p>
+                <p>
+                  META Record Labels is holding the first screening of aspiring
+                  artists from the list of WAVE NFT holders
+                </p>
+              </div>
+              <div class="phase-nft">
+                <img
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 8px;
+                  "
+                  src="/IMAGE (16).png"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="roadmap-connector"></div>
+
+          <!-- Phase 3 -->
+          <div class="roadmap-phase">
+            <div class="phase-header">
+              <div class="phase-num">3</div>
+              <div>
+                <div class="phase-meta">PHASE 3</div>
+                <div class="phase-title-text">SUMMER 2022 — YOUR NEW STAGE</div>
+              </div>
+            </div>
+            <div class="phase-body">
+              <div class="phase-details">
+                <ul>
+                  <li>Onboarding new partners</li>
+                  <li>First live concert in Sandjar</li>
+                  <li>Live concert in Decentrafield</li>
+                </ul>
+                <p>
+                  We secured dates for our artists to perform in front of the
+                  live audience of Metaverse. Check the concert schedule in our
+                  <a href="#" style="color: #39ff14; text-decoration: none"
+                    >Discord</a
+                  >.
+                </p>
+              </div>
+              <div class="phase-nft">
+                <img
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 8px;
+                  "
+                  src="/IMAGE (19).png"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ PARTNERS ══════════════════ -->
+      <div class="section-spacer"></div>
+      <section id="partners">
+        <div class="partners-label">OUR PARTNERS</div>
+        <div class="partners-grid">
+          <div class="partner-logo">LOGOHOLDER</div>
+          <div class="partner-logo">LOGOHOLDER</div>
+          <div class="partner-logo">LOGOHOLDER</div>
+          <div class="partner-logo">LOGOHOLDER</div>
+          <div class="partner-logo">LOGOHOLDER</div>
+          <div class="partner-logo">LOGOHOLDER</div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ FAQ ══════════════════ -->
+      <div class="section-spacer"></div>
+      <section id="faq">
+        <div class="faq-left">
+          <h2>FREQUENTLY<br /><span class="dim">ASKED</span><br />QUESTIONS</h2>
+          <div class="faq-nft">
+            <img
+              style="width: 100%; height: 100%; object-fit: cover"
+              src="/IMAGE (18).png"
+            />
+          </div>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item open">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              How can I get into Meta RL?
+              <div class="faq-indicator"></div>
+            </div>
+            <div class="faq-answer">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Suspendisse varius enim in eros elementum tristique.
+            </div>
+          </div>
+          <div class="faq-item open">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              When is the NFT launch?
+              <div class="faq-indicator"></div>
+            </div>
+            <div class="faq-answer">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Suspendisse varius enim in eros elementum tristique. Duis cursus,
+              mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam
+              libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum
+              lorem imperdiet. Nunc ut sem vitae risus tristique posuere.<br /><br />Lorem
+              ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+              varius enim in eros elementum tristique.
+            </div>
+          </div>
+          <div class="faq-item open">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              Where can I get a WAVE NFT?
+              <div class="faq-indicator"></div>
+            </div>
+            <div class="faq-answer">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Suspendisse varius enim in eros elementum tristique. Duis cursus,
+              mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam
+              libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum
+              lorem imperdiet. Nunc ut sem vitae risus tristique posuere.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ TEAM ══════════════════ -->
+      <div class="section-spacer"></div>
+      <section id="team">
+        <div class="team-marquee-wrap">
+          <div class="team-marquee-track">
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+            <span class="team-marquee-word">TEAM</span>
+          </div>
+        </div>
+
+        <div class="team-grid">
+          <!-- Shaky Lake -->
+          <div class="team-card">
+            <div class="team-photo">
+              <img src="/IMAGE (11).png" />
+            </div>
+            <div class="team-name">SHAKY LAKE</div>
+            <div class="team-role">Founder</div>
+            <div class="team-socials">
+              <a href="#" class="team-social">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"
+                  />
+                </svg>
+              </a>
+              <a href="#" class="team-social">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  />
+                </svg>
+              </a>
+            </div>
+            <div class="team-bio">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt
+            </div>
+          </div>
+
+          <!-- Baky Hike -->
+          <div class="team-card">
+            <div class="team-photo">
+              <img src="/IMAGE (12).png" />
+            </div>
+            <div class="team-name">BAKY HIKE</div>
+            <div class="team-role">Co-Founder</div>
+            <div class="team-socials">
+              <a href="#" class="team-social">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"
+                  />
+                </svg>
+              </a>
+              <a href="#" class="team-social">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  />
+                </svg>
+              </a>
+            </div>
+            <div class="team-bio">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt
+            </div>
+          </div>
+
+          <!-- Vania Do -->
+          <div class="team-card">
+            <div class="team-photo">
+              <img src="/IMAGE (13).png" />
+            </div>
+            <div class="team-name">VANIA DO</div>
+            <div class="team-role">Producer</div>
+            <div class="team-socials">
+              <a href="#" class="team-social">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"
+                  />
+                </svg>
+              </a>
+              <a href="#" class="team-social">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  />
+                </svg>
+              </a>
+            </div>
+            <div class="team-bio">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt
+            </div>
+          </div>
+        </div>
+        <div style="height: 80px"></div>
+      </section>
+
+      <!-- ══════════════════ DISCORD CTA ══════════════════ -->
+      <section id="discord-cta">
+        <div class="discord-left">
+          <h2>JOIN OUR<br /><span>DISCORD</span></h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+            varius enim in eros elementum tristique.
+          </p>
+          <a href="#" class="btn-discord">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"
+              />
+            </svg>
+            Join Discord
+          </a>
+        </div>
+        <div class="discord-nft">
+          <div class="discord-nft-bg">
+            <img
+              style="width: 100%; height: 100%; object-fit: cover"
+              src="/IMAGE (19).png"
+            />
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- ══════════════════ FOOTER ══════════════════ -->
+    <footer>
+      <div>
+        <a href="#" class="footer-logo">Meta<sup>RL</sup></a>
+        <div class="footer-copy">©2022 All rights reserved</div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════ PARTNERS ══════════════════ -->
-<div class="section-spacer"></div>
-<section id="partners">
-  <div class="partners-label">OUR PARTNERS</div>
-  <div class="partners-grid">
-    <div class="partner-logo">LOGOHOLDER</div>
-    <div class="partner-logo">LOGOHOLDER</div>
-    <div class="partner-logo">LOGOHOLDER</div>
-    <div class="partner-logo">LOGOHOLDER</div>
-    <div class="partner-logo">LOGOHOLDER</div>
-    <div class="partner-logo">LOGOHOLDER</div>
-  </div>
-</section>
-
-<!-- ══════════════════ FAQ ══════════════════ -->
-<div class="section-spacer"></div>
-<section id="faq">
-  <div class="faq-left">
-    <h2>FREQUENTLY<br/><span class="dim">ASKED</span><br/>QUESTIONS</h2>
-    <div class="faq-nft">
-      <div style="width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%, rgba(180,20,100,0.7) 0%, transparent 55%),radial-gradient(ellipse at 30% 80%, rgba(120,0,60,0.5) 0%, transparent 50%),linear-gradient(135deg,#100510,#1a0520);position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px;">
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 200 260" fill="none" style="width:85%;height:85%;">
-            <path d="M55 30 L100 10 L145 30 L165 120 L145 210 L100 240 L55 210 L35 120 Z" fill="none" stroke="rgba(220,50,150,0.5)" stroke-width="1.5"/>
-            <polygon points="100,40 145,120 100,160 55,120" fill="rgba(200,0,100,0.2)" stroke="rgba(255,100,150,0.4)" stroke-width="1"/>
-            <circle cx="100" cy="110" r="40" fill="rgba(150,0,80,0.3)" stroke="rgba(220,50,120,0.4)" stroke-width="1"/>
-            <ellipse cx="100" cy="200" rx="80" ry="20" fill="none" stroke="rgba(220,50,100,0.5)" stroke-width="2"/>
+      <div class="footer-col">
+        <a href="#wave-nft" class="footer-link">Wave NFTs</a>
+        <a href="#story" class="footer-link">Stories</a>
+        <a href="#faq" class="footer-link">Contact</a>
+      </div>
+      <div class="footer-col">
+        <a href="#" class="footer-link">Licencing</a>
+        <a href="#" class="footer-link">Style Guide</a>
+        <a href="#" class="footer-link">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-info">
+          Powered by Webflow<br /><br />Developed by Anastasiia G.
+        </div>
+      </div>
+      <div class="footer-socials">
+        <a href="#" class="social-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path
+              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25z"
+            />
           </svg>
-        </div>
-        <span style="position:relative;z-index:2;font-family:'Orbitron',monospace;font-size:16px;font-weight:700;letter-spacing:3px;color:#fff;">WAVE</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="faq-list">
-    <div class="faq-item open">
-      <div class="faq-question" onclick="toggleFaq(this)">
-        How can I get into Meta RL?
-        <div class="faq-indicator"></div>
-      </div>
-      <div class="faq-answer">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</div>
-    </div>
-    <div class="faq-item open">
-      <div class="faq-question" onclick="toggleFaq(this)">
-        When is the NFT launch?
-        <div class="faq-indicator"></div>
-      </div>
-      <div class="faq-answer">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum lorem imperdiet. Nunc ut sem vitae risus tristique posuere.<br/><br/>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</div>
-    </div>
-    <div class="faq-item open">
-      <div class="faq-question" onclick="toggleFaq(this)">
-        Where can I get a WAVE NFT?
-        <div class="faq-indicator"></div>
-      </div>
-      <div class="faq-answer">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat. Aenean faucibus nibh et justo cursus id rutrum lorem imperdiet. Nunc ut sem vitae risus tristique posuere.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════ TEAM ══════════════════ -->
-<div class="section-spacer"></div>
-<section id="team">
-  <div class="team-marquee-wrap">
-    <div class="team-marquee-track">
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-      <span class="team-marquee-word">TEAM</span>
-    </div>
-  </div>
-
-  <div class="team-grid">
-    <!-- Shaky Lake -->
-    <div class="team-card">
-      <div class="team-photo">
-<img src="/IMAGE (11).png">
-      </div>
-      <div class="team-name">SHAKY LAKE</div>
-      <div class="team-role">Founder</div>
-      <div class="team-socials">
-        <a href="#" class="team-social">
-          <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
         </a>
-        <a href="#" class="team-social">
-          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        <a href="#" class="social-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path
+              d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"
+            />
+          </svg>
+        </a>
+        <a href="#" class="social-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path
+              d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+            />
+          </svg>
+        </a>
+        <a href="#" class="social-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path
+              d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"
+            />
+          </svg>
         </a>
       </div>
-      <div class="team-bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt</div>
-    </div>
+    </footer>
 
-    <!-- Baky Hike -->
-    <div class="team-card">
-      <div class="team-photo">
-<img src="/IMAGE (12).png">
-      </div>
-      <div class="team-name">BAKY HIKE</div>
-      <div class="team-role">Co-Founder</div>
-      <div class="team-socials">
-        <a href="#" class="team-social">
-          <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
-        </a>
-        <a href="#" class="team-social">
-          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        </a>
-      </div>
-      <div class="team-bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt</div>
-    </div>
-
-    <!-- Vania Do -->
-    <div class="team-card">
-      <div class="team-photo">
-<img src="/IMAGE (13).png">
-      </div>
-      <div class="team-name">VANIA DO</div>
-      <div class="team-role">Producer</div>
-      <div class="team-socials">
-        <a href="#" class="team-social">
-          <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
-        </a>
-        <a href="#" class="team-social">
-          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        </a>
-      </div>
-      <div class="team-bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt</div>
-    </div>
-  </div>
-  <div style="height:80px;"></div>
-</section>
-
-<!-- ══════════════════ DISCORD CTA ══════════════════ -->
-<section id="discord-cta">
-  <div class="discord-left">
-    <h2>JOIN OUR<br/><span>DISCORD</span></h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
-    <a href="#" class="btn-discord">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
-      Join Discord
-    </a>
-  </div>
-  <div class="discord-nft">
-    <div class="discord-nft-bg">
-      <svg viewBox="0 0 200 260" fill="none" style="width:85%;height:85%;">
-        <path d="M50 25 L100 5 L150 25 L170 125 L150 215 L100 245 L50 215 L30 125 Z" fill="none" stroke="rgba(180,100,255,0.5)" stroke-width="1.5"/>
-        <polygon points="100,35 148,125 100,165 52,125" fill="rgba(120,0,200,0.2)" stroke="rgba(180,80,255,0.4)" stroke-width="1"/>
-        <circle cx="100" cy="115" r="45" fill="rgba(80,0,160,0.3)" stroke="rgba(150,80,255,0.4)" stroke-width="1"/>
-        <circle cx="100" cy="115" r="22" fill="rgba(100,0,180,0.35)"/>
-        <ellipse cx="100" cy="205" rx="80" ry="20" fill="none" stroke="rgba(180,100,255,0.5)" stroke-width="2"/>
-        <!-- Sparkle dots -->
-        <circle cx="30" cy="40" r="2" fill="rgba(255,255,255,0.5)"/>
-        <circle cx="165" cy="80" r="1.5" fill="rgba(255,255,255,0.4)"/>
-        <circle cx="140" cy="20" r="1" fill="rgba(255,255,255,0.6)"/>
-        <circle cx="50" cy="180" r="2" fill="rgba(255,255,255,0.3)"/>
-      </svg>
-    </div>
-    <span style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.5);">WAVE</span>
-  </div>
-</section>
-
-<!-- ══════════════════ FOOTER ══════════════════ -->
-<footer>
-  <div>
-    <a href="#" class="footer-logo">Meta<sup>RL</sup></a>
-    <div class="footer-copy">©2022 All rights reserved</div>
-  </div>
-  <div class="footer-col">
-    <a href="#wave-nft" class="footer-link">Wave NFTs</a>
-    <a href="#story" class="footer-link">Stories</a>
-    <a href="#faq" class="footer-link">Contact</a>
-  </div>
-  <div class="footer-col">
-    <a href="#" class="footer-link">Licencing</a>
-    <a href="#" class="footer-link">Style Guide</a>
-    <a href="#" class="footer-link">Changelog</a>
-  </div>
-  <div class="footer-col">
-    <div class="footer-info">Powered by Webflow<br/><br/>Developed by Anastasiia G.</div>
-  </div>
-  <div class="footer-socials">
-    <a href="#" class="social-btn" style="border-color:rgba(255,255,255,0.4);">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.1 2.25h6.264l4.263 5.637L18.244 2.25z"/></svg>
-    </a>
-    <a href="#" class="social-btn" style="border-color:rgba(255,255,255,0.4);">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
-    </a>
-    <a href="#" class="social-btn" style="border-color:rgba(255,255,255,0.4);">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-    </a>
-    <a href="#" class="social-btn" style="border-color:rgba(255,255,255,0.4);">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-    </a>
-  </div>
-</footer>
-
-<script>
-  function toggleFaq(el) {
-    const item = el.parentElement;
-    item.classList.toggle('open');
-  }
-
-  function switchTab(el, tab) {
-    document.querySelectorAll('.story-nav-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-    const content = document.getElementById('story-content');
-    const quotes = {
-      founders: 'META record label was founded by Shaky Lake and Baky Hike in 2020 business accelerator.',
-      partners: 'Our partners are industry leaders who share our vision for the future of music in the Metaverse.',
-      future: 'The future of Meta Record Label is built on blockchain, the Metaverse, and next-generation music distribution.'
-    };
-    content.querySelector('.story-quote').textContent = quotes[tab];
-  }
-
-  // Smooth reveal on scroll
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
+    <script>
+      function toggleFaq(el) {
+        const item = el.parentElement;
+        item.classList.toggle("open");
       }
-    });
-  }, { threshold: 0.1 });
 
-  document.querySelectorAll('section').forEach(s => {
-    s.style.opacity = '0';
-    s.style.transform = 'translateY(24px)';
-    s.style.transition = 'opacity .7s ease, transform .7s ease';
-    observer.observe(s);
-  });
-</script>
-</body>
+      function switchTab(el, tab) {
+        document
+          .querySelectorAll(".story-nav-item")
+          .forEach((i) => i.classList.remove("active"));
+        el.classList.add("active");
+        const content = document.getElementById("story-content");
+        const quotes = {
+          founders:
+            "META record label was founded by Shaky Lake and Baky Hike in 2020 business accelerator.",
+          partners:
+            "Our partners are industry leaders who share our vision for the future of music in the Metaverse.",
+          future:
+            "The future of Meta Record Label is built on blockchain, the Metaverse, and next-generation music distribution.",
+        };
+        content.querySelector(".story-quote").textContent = quotes[tab];
+      }
+
+      // Smooth reveal on scroll
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.style.opacity = "1";
+              e.target.style.transform = "translateY(0)";
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+
+      document.querySelectorAll("section").forEach((s) => {
+        s.style.opacity = "0";
+        s.style.transform = "translateY(24px)";
+        s.style.transition = "opacity .7s ease, transform .7s ease";
+        observer.observe(s);
+      });
+    </script>
+  </body>
 </html>
